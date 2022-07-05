@@ -32,6 +32,6 @@
     "vite": "^2.3.7",
     "vite-plugin-compression": "^0.2.5",
     "vite-plugin-style-import": "^0.10.1",
-    "vue-tsc": "^0.0.24"
+    "vue-tsc": "^0.38.2"
   }
 }

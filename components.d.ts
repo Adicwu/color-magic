@@ -15,7 +15,6 @@ declare module '@vue/runtime-core' {
     VanIcon: typeof import('vant/es')['Icon']
     VanRadio: typeof import('vant/es')['Radio']
     VanRadioGroup: typeof import('vant/es')['RadioGroup']
-    VantRadioGroup: typeof import('vant/es')['tRadioGroup']
   }
 
 }
