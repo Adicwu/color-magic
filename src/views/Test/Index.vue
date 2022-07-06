@@ -13,9 +13,23 @@
         <li>果断的标出你感觉最熟悉的想法和行动</li>
       </ul>
     </div>
+    <div class="test-progress">
+      <van-config-provider
+        :theme-vars="{
+          'progress-height': '4px',
+          'progress-color': 'rgb(0 0 0 / 49%)',
+          'progress-background-color': 'transparent'
+        }"
+      >
+        <van-progress :show-pivot="false" :percentage="progress" />
+      </van-config-provider>
+    </div>
 
     <van-form>
-      <div class="form-title">性格的力量与局限</div>
+      <div class="form-title">
+        性格的力量与局限
+        <p>*请从四个选项中选择最符合您的一项</p>
+      </div>
       <van-radio-group
         v-for="(item, index) in resultOne"
         :key="index"
@@ -46,7 +60,10 @@
       </van-radio-group>
     </van-form>
     <van-form class="form-q">
-      <div class="form-title">情境</div>
+      <div class="form-title">
+        情境
+        <p>*请尝试涉身其境，选择您的做法</p>
+      </div>
       <template v-for="(item, index) in resultTwo" :key="index">
         <div class="form-q__title">
           {{ index + 1 }}. {{ SITUATION[index].q }}
@@ -83,10 +100,10 @@
         }}</a>
       </div>
       <ul>
-        <li style="color: #f94c66">红 ({{ getCount(0) }})</li>
-        <li style="color: #1363df">蓝 ({{ getCount(1) }})</li>
-        <li style="color: #fff">白 ({{ getCount(2) }})</li>
-        <li style="color: #ffee63">黄 ({{ getCount(3) }})</li>
+        <li style="color: #f94c66">红 ({{ resultCount[0] }})</li>
+        <li style="color: #1363df">蓝 ({{ resultCount[1] }})</li>
+        <li style="color: #fff">白 ({{ resultCount[2] }})</li>
+        <li style="color: #ffee63">黄 ({{ resultCount[3] }})</li>
       </ul>
     </van-form>
 
@@ -129,18 +146,32 @@ const resultTwo = reactive(
 )
 
 const allReuslt = computed(() => [...resultOne, ...resultTwo])
-const getCount = computed(
-  () => (type: number) =>
-    allReuslt.value.filter((item) => item.value === type).length
+const resultCount = computed(() =>
+  allReuslt.value.reduce<Record<string | number, number>>(
+    (totol, item) => {
+      totol[item.value]++
+      return totol
+    },
+    {
+      0: 0,
+      1: 0,
+      2: 0,
+      3: 0,
+      '-1': 0
+    }
+  )
 )
 const isSelected = computed(() =>
   allReuslt.value.every((item) => item.value !== -1)
 )
+const progress = computed(() => {
+  const count = allReuslt.value.length
+  return +(((count - resultCount.value[-1]) / count) * 100).toFixed(0)
+})
 
 const mainScroll = (e: Event) => {
   const { scrollTop, scrollHeight, clientHeight } = e.target as HTMLDivElement
   if (clientHeight + scrollTop === scrollHeight) {
-    console.log('end')
     state.scrollEnd = true
     selfEl.value!.removeEventListener('scroll', mainScroll)
   }
@@ -162,7 +193,9 @@ const changeRadio = (e: typeof resultOne[0], v: number) => {
 onMounted(() => {
   selfEl.value!.addEventListener('scroll', mainScroll)
   Dialog({
-    message: '注意，此测试尚在开发阶段，只有结果展示，没有结果分析'
+    title: '注意，如对此测试无兴趣，请尽早退出',
+    message:
+      '此测试尚在开发阶段，只有结果展示，没有结果分析。如想了解具体解答，可参考《色彩密码》一书'
   })
 })
 </script>
@@ -183,11 +216,14 @@ onMounted(() => {
     border-bottom-right-radius: 140px;
     padding: 20px;
     box-sizing: border-box;
+
     b {
-      font-size: 34px;
+      font-size: 36px;
       color: #fff;
     }
+
     p {
+      padding-top: 4px;
       color: rgba(255, 255, 255, 0.837);
     }
   }
@@ -202,18 +238,22 @@ onMounted(() => {
     padding: 16px 24px;
     padding-bottom: 24px;
     box-sizing: border-box;
+
     h2 {
       font-size: 20px;
     }
+
     p {
       color: #c1c5cd;
       font-size: 12px;
       line-height: 16px;
     }
+
     ul {
       font-size: 15px;
       color: #333;
       padding-top: 10px;
+
       li {
         display: inline-block;
         margin-top: 12px;
@@ -240,6 +280,18 @@ onMounted(() => {
     animation-duration: 0.25s;
   }
 
+  &-progress {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 8;
+
+    ::v-deep(.van-progress) {
+      border-radius: 0;
+    }
+  }
+
   .form-title {
     position: relative;
     font-size: 24px;
@@ -248,6 +300,11 @@ onMounted(() => {
     z-index: 4;
     text-align: center;
     letter-spacing: 8px;
+    p {
+      font-size: 12px;
+      color: #999;
+      letter-spacing: 2px;
+    }
   }
 
   .form-q {
@@ -263,10 +320,12 @@ onMounted(() => {
       border-left: 6px solid #8b80b6;
       box-shadow: -4px -4px 14px rgba(0, 0, 0, 0.2);
       border-radius: 4px;
+
       &::after {
         content: '：';
       }
     }
+
     ::v-deep(.van-cell-group) {
       margin-top: 14px;
     }
@@ -284,6 +343,7 @@ onMounted(() => {
       padding: 30px 0;
       border-radius: 6px;
     }
+
     .form-title {
       a {
         font-size: 14px;
@@ -291,6 +351,7 @@ onMounted(() => {
         letter-spacing: 0;
       }
     }
+
     .isSelected {
       color: #3ec70b !important;
     }
@@ -305,6 +366,7 @@ onMounted(() => {
     .van-cell {
       transition: all 0.25s;
       padding: 20px 16px;
+
       .van-cell__title {
         padding-right: 14px;
       }
@@ -312,6 +374,7 @@ onMounted(() => {
       &.active {
         background-color: #8b80b6;
         color: #fff;
+
         .van-cell__title {
           span {
             font-weight: 800;
@@ -319,6 +382,7 @@ onMounted(() => {
         }
       }
     }
+
     .van-radio {
       overflow: unset;
     }
@@ -338,6 +402,7 @@ onMounted(() => {
       border-radius: 50%;
       transform: scale(0.65);
     }
+
     &.active {
       border-color: #fff;
     }
